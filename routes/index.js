@@ -10,4 +10,11 @@ router.get("/users", function(req, res, nex){
 });
 
 
+router.get("/posts", function(req, res, nex){
+	models.Post.findAll().then(function(data){
+	res.json({posts: data});
+});
+});
+
+
 module.exports = router;

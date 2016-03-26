@@ -16,20 +16,38 @@ sequelize.authenticate().then(function (err) {
 
 
 var models = [
-      'User'
+      'User',
+      'Post'
         ];
 
   models.forEach(function(model){
     module.exports[model] = sequelize.import(__dirname + '/_' + model);
   });
 
+
+// describe relationships
+(function (m) {
+
+    m.User.hasMany(m.Post);
+    m.Post.belongsTo(m.User);
+
+
+})(module.exports);
+
 sequelize.sync({
    force: true
 }).then(function () {
    module.exports.User.create({
-       username: 'superadmin',
-       password: 'randompass',
-       claims: 'read-full, addUser, getUser'
+       username: 'superman',
+       password: 'hackathon',
+       claims: 'read-full'
+   }).then(function(user){
+      module.exports.Post.create({
+          title: 'Hello world',
+          datepost: new Date(),
+          content: 'Welcome!',
+          UserId: user.id
+      });
    });
 });
 module.exports.sequelize = sequelize;
