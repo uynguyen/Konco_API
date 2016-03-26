@@ -24,7 +24,7 @@ System.register(['angular2/core'], function(exports_1, context_1) {
                 AppComponent = __decorate([
                     core_1.Component({
                         selector: 'my-app',
-                        template: '<h1>Konco</h1>'
+                        template: '<h1>Konco</h1><form action="/api/uploads"  id ="uploadForm" enctype="multipart/form-data" method="post"><input type="file" name="userPhoto"><input type="submit" value="Upload Image" name="submit"></form>'
                     }), 
                     __metadata('design:paramtypes', [])
                 ], AppComponent);

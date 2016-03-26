@@ -14,7 +14,7 @@ var https = require('https');
 var compression = require('compression');
 var cfenv = require('cfenv');
 var helmet = require('helmet');
-
+var bodyParser = require('body-parser');
 
 
 // create a new express server
@@ -27,6 +27,11 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/client'));
 app.use(express.static(__dirname + '/node_modules'));
 app.use(cors());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+app.use(bodyParser.json());
 app.use(compression());
 
 // get the app environment from Cloud Foundry
@@ -34,11 +39,13 @@ var appEnv = cfenv.getAppEnv();
 
 
 app.get("/api", function(req, res) {
-	res.json({status: "My API is alive!"});
+    res.json({
+        status: "My API is alive!"
+    });
 });
 
-app.get("/", function(req, res, next){
-	res.sendFile("index.html");
+app.get("/", function(req, res, next) {
+    res.sendFile("index.html");
 });
 var router = require('./routes');
 app.use("/api", router);
@@ -46,8 +53,8 @@ app.use("/api", router);
 // start server on the specified port and binding host
 app.listen(appEnv.port, '0.0.0.0', function() {
 
-	// print a message when the server starts listening
-  console.log("server starting on " + appEnv.url);
+    // print a message when the server starts listening
+    console.log("server starting on " + appEnv.url);
 });
 
 module.exports = app;

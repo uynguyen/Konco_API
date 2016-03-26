@@ -1,6 +1,4 @@
-
-
-module.exports = function (sequelize, DataTypes) {
+module.exports = function(sequelize, DataTypes) {
 
     var Post = sequelize.define('Post', {
         title: {
@@ -13,6 +11,16 @@ module.exports = function (sequelize, DataTypes) {
         },
         content: {
             type: DataTypes.TEXT,
+            required: true
+        },
+        num_view: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            required: true
+        },
+        num_vote: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
             required: true
         }
     }, {
