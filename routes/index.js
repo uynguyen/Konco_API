@@ -4,7 +4,6 @@ var View = models.View;
 var Post = models.Post;
 var Comment = models.Comment;
 var Profile = models.Profile;
-var Period = models.Period;
 var User = models.User;
 var Week = models.Week;
 var Status = models.Status;
@@ -31,7 +30,7 @@ var multer = require("multer");
 
 
 router.get("/users", function(req, res, next) {
-    models.User.findAll().then(function(data) {
+    User.findAll().then(function(data) {
         res.json({
             users: data
         });
@@ -39,7 +38,7 @@ router.get("/users", function(req, res, next) {
 });
 
 router.get("/user/:fbid", function(req, res, next) {
-    models.User.find({
+    User.find({
         where: {
             fbid: req.params.fbid
         }
@@ -57,13 +56,13 @@ router.get("/user/:fbid", function(req, res, next) {
 });
 
 router.post("/user", function(req, res, next) {
-    models.User.find({
+    User.find({
         where: {
             fbid: req.body.user.fbid
         }
     }).then(function(user) {
         if (user == null) {
-            models.User.create({
+            User.create({
                 fbid: req.body.user.fbid,
                 fullname: req.body.user.fullname,
                 avatarUrl: req.body.user.avatarUrl
@@ -82,7 +81,7 @@ router.post("/user", function(req, res, next) {
 
 
 router.get("/posts", function(req, res, next) {
-    models.Post.findAll({
+    Post.findAll({
         include: [{
             all: ['BelongsTo', 'HasMany'],
             attributes: {
@@ -101,7 +100,7 @@ router.get("/posts", function(req, res, next) {
 });
 
 router.get("/post/:id", function(req, res, next) {
-    models.Post.find({
+    Post.find({
         where: {
             id: req.params.id
         },
@@ -184,7 +183,7 @@ router.delete("/post/:id", function(req, res, next) {
 });
 
 router.get("/views", function(req, res, next) {
-    models.View.findAll().then(function(data) {
+    View.findAll().then(function(data) {
         res.json({
             views: data
         });
@@ -315,9 +314,9 @@ router.post("/profile", function(req, res, next) {
     Profile.create({
         name: req.body.profile.name,
         isBorn: req.body.profile.isBorn,
-        unit: req.body.profile.time < 45 ? 'week': 'month', 
+        unit: req.body.profile.isBorn ? 'week': 'month', 
         time: req.body.profile.time,
-        isMale: req.body.profile.isBorn ? true: false
+        isMale: req.body.profile.isBorn ? req.body.profile.isMale : false
     }).then(function(profile) {
         if (profile != null)
         {
@@ -378,8 +377,7 @@ router.post("/week", function(req, res, next) {
         info: req.body.week.info
     }).then(function(week) {
         if (week != null)
-        {
-           
+        {          
              return  res.status(200).json({
                          message: "Add week successfully!"
             });
@@ -442,29 +440,29 @@ router.post("/standard", function(req, res, next) {
 });
 
 
-router.get("/recent_standard/:user_id", function(req, res, next) {
+router.get("/recommendation/:user_id", function(req, res, next) {
     User.find({where:{fbid:req.params.user_id}}).then(function(user){
         if (user != null)
         {
             Profile.findAll({where:{UserId: user.id, isBorn:true}}).then(function(profiles){
-    if (profiles.length == 0)
-    {
-        return res.status(200).json({standards: []});
-    }
-    else
-    {
-        var result = [];
-        for (var i = profiles.length - 1; i >= 0; i--) {
-            Standard.find({where:{isMale:profiles[i].isMale, monthsold:profiles[i].time}})
-            .then(function(standard){
-                if (standard != null)
-                    result.push(standard);
-            });
-           
-        }
-        res.status(200).json({standards: result});
-    }
-   });
+            if (profiles.length == 0)
+            {
+                return res.status(200).json({standards: []});
+            }
+            else
+            {
+                var result = [];
+                for (var i = profiles.length - 1; i >= 0; i--) {
+                    Standard.find({where:{isMale:profiles[i].isMale, monthsold:profiles[i].time}})
+                    .then(function(standard){
+                        if (standard != null)
+                            result.push(standard);
+                    });
+              
+                }
+                res.status(200).json({standards: result});
+            }
+           });
         }
         else
         {

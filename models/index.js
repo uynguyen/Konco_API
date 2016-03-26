@@ -20,7 +20,6 @@ var models = [
     'Post',
     'View',
     'Comment',
-    'Period',
     'Profile',
     'Week',
     'Status',
@@ -54,35 +53,47 @@ models.forEach(function(model) {
 
     m.Status.belongsTo(m.Profile);
     m.Profile.hasMany(m.Status);
-
-    m.Post.belongsTo(m.Period);
-    m.Period.hasMany(m.Post);
-
 })(module.exports);
 
 
 sequelize.sync({
     force: true
 }).then(function() {
-    module.exports.Period.create({
-        start: new Date(1, 1, 1),
-        end: Date(2, 1, 1), 
-        name: "Ngày đầu tiên"
-    }).then(function(p){
+    module.exports.Standard.create({
+        height: '25-30',
+        weight: '4-4.5',
+        monthsold: 24,
+        isMale: false
+    });
 
     module.exports.User.create({
-        fbid: '100110101',
+        fbid: '1001',
         fullname: 'Super Women',
         avatarUrl: 'http://www.yes24.vn/Upload/ProductImage/mommy/1039809_M.jpg'
     }).then(function(user) {
+
+        module.exports.Profile.create({
+            UserId: user.id,
+            name: "Nguyễn Thị Long Uy",
+            isBorn: true,
+            time: 24,
+            isMale: false
+        }).then(function(profile){
+            module.exports.Status.create({
+                ProfileId: profile.id,
+                height: 30,
+                weight: 4.5,
+                date: new Date()
+            });
+        });
+
         module.exports.Post.create({
             title: 'Hello world',
             datepost: new Date(),
             content: 'Welcome!',
             num_view: 1,
             num_vote: 0,
-            UserId: user.id,
-            PeriodId: 1
+            UserId: user.id
         }).then(function(post) {
             module.exports.View.create({
                 UserId: user.id,
@@ -123,7 +134,6 @@ sequelize.sync({
             });
         });
     });
-     });
 });
 
 
