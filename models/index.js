@@ -22,7 +22,9 @@ var models = [
     'Comment',
     'Period',
     'Profile',
-    'Week'
+    'Week',
+    'Status',
+    'Standard'
 ];
 
 models.forEach(function(model) {
@@ -50,8 +52,8 @@ models.forEach(function(model) {
     m.Profile.belongsTo(m.User);
     m.User.hasMany(m.Profile);
 
-    m.Profile.belongsTo(m.Period);
-    m.Period.hasMany(m.Profile);
+    m.Status.belongsTo(m.Profile);
+    m.Profile.hasMany(m.Status);
 
     m.Post.belongsTo(m.Period);
     m.Period.hasMany(m.Post);

@@ -7,6 +7,8 @@ var Profile = models.Profile;
 var Period = models.Period;
 var User = models.User;
 var Week = models.Week;
+var Status = models.Status;
+var Standard = models.Standard;
 var router = express.Router();
 var multer = require("multer");
 
@@ -66,13 +68,13 @@ router.post("/user", function(req, res, next) {
                 fullname: req.body.user.fullname,
                 avatarUrl: req.body.user.avatarUrl
             }).then(function(newUser) {
-                res.json({
+                res.status(200).json({
                     message: "Create user successfully!"
                 });
             });
         } else {
-            res.json({
-                message: "username invalid!"
+            res.status(200).json({
+                message: "Login successfully!"
             });
         }
     });
@@ -312,8 +314,10 @@ router.post("/comment", function(req, res, next) {
 router.post("/profile", function(req, res, next) {
     Profile.create({
         name: req.body.profile.name,
-        start: req.body.profile.start,
-        PeriodId: req.body.profile.PeriodId
+        isBorn: req.body.profile.isBorn,
+        unit: req.body.profile.time < 45 ? 'week': 'month', 
+        time: req.body.profile.time,
+        isMale: req.body.profile.isBorn ? true: false
     }).then(function(profile) {
         if (profile != null)
         {
@@ -343,6 +347,28 @@ router.post("/profile", function(req, res, next) {
             });
        } 
     });
+});
+
+router.post("/status", function(req, res, next) {
+    Status.create({
+        height: req.body.status.height,
+        weight: req.body.status.weight,
+        date: new Date(),
+        ProfileId: req.body.status.ProfileId
+    }).then(function(status) {
+        if (status != null)
+        {            
+            res.status(200).json({
+                message: "Create status successfully!"
+            });           
+        }
+       else
+       {
+            res.status(500).json({
+                message: "Create status error!"
+            });
+       } 
+   });
 });
 
 
@@ -393,8 +419,59 @@ router.get("/week/:name", function(req, res, next) {
 });
 
 
+router.post("/standard", function(req, res, next) {
+    Standard.create({
+        height: req.body.standard.height,
+        weight: req.body.standard.weight,
+        monthsold: req.body.standard.monthsold,
+        isMale: req.body.standard.isMale
+    }).then(function(standard) {
+        if (standard != null)
+        {         
+             return  res.status(200).json({
+                         message: "Add standard successfully!"
+            });              
+        }
+       else
+       {
+            res.status(500).json({
+                message: "Create standard error!"
+            });
+       } 
+    });
+});
 
 
+router.get("/recent_standard/:user_id", function(req, res, next) {
+    User.find({where:{fbid:req.params.user_id}}).then(function(user){
+        if (user != null)
+        {
+            Profile.findAll({where:{UserId: user.id, isBorn:true}}).then(function(profiles){
+    if (profiles.length == 0)
+    {
+        return res.status(200).json({standards: []});
+    }
+    else
+    {
+        var result = [];
+        for (var i = profiles.length - 1; i >= 0; i--) {
+            Standard.find({where:{isMale:profiles[i].isMale, monthsold:profiles[i].time}})
+            .then(function(standard){
+                if (standard != null)
+                    result.push(standard);
+            });
+           
+        }
+        res.status(200).json({standards: result});
+    }
+   });
+        }
+        else
+        {
+            res.status(404).json({message: "Not found"});
+        }
+    });  
+});
 
 
 // ==========================================================================
@@ -416,7 +493,7 @@ router.post('/uploads', function(req, res, next){
         if(err) {
             return res.end("Error uploading file.");
         }
-        res.end("File is uploaded");
+        res.end("File is uploaded"); 
     });
 });
 // ==========================================================================
