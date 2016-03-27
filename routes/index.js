@@ -441,33 +441,49 @@ router.post("/standard", function(req, res, next) {
 
 
 router.get("/recommendation/:user_id", function(req, res, next) {
-    User.find({where:{fbid:req.params.user_id}}).then(function(user){
+    User.find({
+        where: {
+            fbid: req.params.user_id
+        },
+        include: [{
+            all: ['BelongsTo', 'HasMany'],
+            attributes: {
+                exclude: ['createdAt', 'updatedAt']
+            }
+        }],
+        attributes: {
+            exclude: ['createdAt', 'updatedAt']
+        }
+    }).then(function(user){
+
         if (user != null)
         {
-            Profile.findAll({where:{UserId: user.id, isBorn:true}}).then(function(profiles){
-            if (profiles.length == 0)
-            {
-                return res.status(200).json({standards: []});
-            }
-            else
-            {
-                var result = [];
-                for (var i = profiles.length - 1; i >= 0; i--) {
-                    Standard.find({where:{isMale:profiles[i].isMale, monthsold:profiles[i].time}})
-                    .then(function(standard){
-                        if (standard != null)
-                            result.push(standard);
+           
+            for (var profile of user.Profiles){
+                if (profile.isBorn)
+                {
+                    Standard.find({where:{
+                        monthsold: profile.time,
+                        isMale: profile.isMale
+                    }}).then(function(standard){
+                        profile.suggest = standard;
                     });
-              
                 }
-                res.status(200).json({standards: result});
-            }
-           });
+                else
+                {
+                    Week.find({where:{name:profile.time}}).then(function(week){
+                        profile.suggest = week;
+                    });
+                }
+            }  
+            res.status(200).json(user.Profiles);
         }
         else
         {
             res.status(404).json({message: "Not found"});
         }
+
+
     });  
 });
 
